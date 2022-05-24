@@ -9,7 +9,7 @@ function Item({id}) {
   const [owner,setOwner] = React.useState();
   const [image,setImage] = React.useState();
 
-  const localHost = "http://127.0.0.1:8000/"
+  const localHost = "http://127.0.0.1:8000"
   const agent = new HttpAgent({host:localHost});
 
 
