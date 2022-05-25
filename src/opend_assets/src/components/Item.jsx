@@ -16,7 +16,7 @@ function Item({id}) {
   async function getOwner() {
     const NFTActor = await Actor.createActor(idlFactory, {
       agent,
-      canisterId: Principal.fromText(id)
+      canisterId: id
     })
 
     const owner = await NFTActor.getOwner()
@@ -27,12 +27,10 @@ function Item({id}) {
 
 
 
-  
-
   async function getAsset() {
     const NFTActor = await Actor.createActor(idlFactory, {
       agent,
-      canisterId: Principal.fromText(id)
+      canisterId: id
     })
 
     const image_data = await NFTActor.getAsset()
@@ -51,7 +49,7 @@ function Item({id}) {
 async function loadNft() {
   const NFTActor = await Actor.createActor(idlFactory, {
     agent,
-    canisterId: Principal.fromText(id)
+    canisterId: id
   })
 
 
