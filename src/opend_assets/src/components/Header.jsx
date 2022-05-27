@@ -25,7 +25,7 @@ const [userOwnedGallery, setUserOwnedGallery] = React.useState()
     getNfts()
   }, [])
   return (
-    <BrowserRouter>
+    <BrowserRouter forceRefresh={true}>
      <div className="app-root-1">
       <header className="Paper-root AppBar-root AppBar-positionStatic AppBar-colorPrimary Paper-elevation4">
         <div className="Toolbar-root Toolbar-regular header-appBar-13 Toolbar-gutters">
@@ -63,7 +63,6 @@ const [userOwnedGallery, setUserOwnedGallery] = React.useState()
       <Route exact path='/'>
       <img className="bottom-space" src={homeImage} />
       </Route>
-
 
       <Route path='/discover'></Route>
       <Route path="/minter">

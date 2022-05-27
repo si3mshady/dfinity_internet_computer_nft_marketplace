@@ -3,11 +3,14 @@ import logo from "../../assets/logo.png";
 import {Actor,HttpAgent} from '@dfinity/agent'
 import {idlFactory} from "../../../declarations/nft"
 import {Principal} from "@dfinity/principal"
+import Button from "./Button";
 
 function Item({id}) {
   const [name,setName] = React.useState();
   const [owner,setOwner] = React.useState();
   const [image,setImage] = React.useState();
+  const [button, setButton] = React.useState();
+  const [priceInput,setPriceInput] = React.useState();
 
   const localHost = "http://127.0.0.1:8000"
   const agent = new HttpAgent({host:localHost});
@@ -22,10 +25,23 @@ function Item({id}) {
     const owner = await NFTActor.getOwner()
   
     setOwner(owner.toText())
+    setButton(<Button text={"Sell"} handleClick={handleSell}/>)
 
   }
 
+let price;
+const handleSell = () => {
+  console.log("Sell Clicked")
+  setPriceInput(<input
+    placeholder="Price in DANG"
+    type="number"
+    className="price-input"
+    value={price}
+    onChange={(e) => {price=e.target.value}}
+  />)
 
+  setButton(<Button text={"Confirm"} handleClick={handleSell}/>)
+}
 
   async function getAsset() {
     const NFTActor = await Actor.createActor(idlFactory, {
@@ -81,6 +97,8 @@ getAsset()
           <p className="disTypography-root makeStyles-bodyText-24 disTypography-body2 disTypography-colorTextSecondary">
             Owner: {owner}
           </p>
+          {priceInput}
+          {button}
         </div>
       </div>
     </div>
