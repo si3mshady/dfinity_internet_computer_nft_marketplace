@@ -64,7 +64,9 @@ const [userOwnedGallery, setUserOwnedGallery] = React.useState()
       <img className="bottom-space" src={homeImage} />
       </Route>
 
-      <Route path='/discover'></Route>
+      <Route path='/discover'>
+        <h1>Discover</h1>
+      </Route>
       <Route path="/minter">
         <Minter/>
       </Route>

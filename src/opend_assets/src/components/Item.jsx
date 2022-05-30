@@ -40,7 +40,11 @@ const handleSell = () => {
     onChange={(e) => {price=e.target.value}}
   />)
 
-  setButton(<Button text={"Confirm"} handleClick={handleSell}/>)
+  setButton(<Button text={"Confirm"} handleClick={sellItem}/>)
+}
+
+const sellItem = async () => {
+  console.log('Item sold for ' + price)
 }
 
   async function getAsset() {
