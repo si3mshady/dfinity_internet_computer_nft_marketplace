@@ -4,6 +4,7 @@ import {Actor,HttpAgent} from '@dfinity/agent'
 import {idlFactory} from "../../../declarations/nft"
 import {Principal} from "@dfinity/principal"
 import Button from "./Button";
+import {opend} from "../../../declarations/opend";
 
 function Item({id}) {
   const [name,setName] = React.useState();
@@ -11,13 +12,19 @@ function Item({id}) {
   const [image,setImage] = React.useState();
   const [button, setButton] = React.useState();
   const [priceInput,setPriceInput] = React.useState();
+  const [loading, setLoadingHidden] = React.useState(true)
+  const [blur, setBlur] = React.useState()
+  const [sellStatus,setSellStatus] = React.useState('')
 
   const localHost = "http://127.0.0.1:8000"
   const agent = new HttpAgent({host:localHost});
+  // when testing locally use the fetch rootkey method. remove when deploying liv
+  agent.fetchRootKey()
 
 
+  let NFTActor; 
   async function getOwner() {
-    const NFTActor = await Actor.createActor(idlFactory, {
+     NFTActor = await Actor.createActor(idlFactory, {
       agent,
       canisterId: id
     })
@@ -25,7 +32,18 @@ function Item({id}) {
     const owner = await NFTActor.getOwner()
   
     setOwner(owner.toText())
-    setButton(<Button text={"Sell"} handleClick={handleSell}/>)
+
+    const isListed = await opend.isListed(id)
+  
+    if (isListed) {
+      setBlur({filter: "blur(10px)"})
+      setOwner("OpenD Marketplace")
+      setSellStatus("Listed!")
+    }
+    else {
+      setButton(<Button text={"Sell"} handleClick={handleSell}/>)
+    }
+   
 
   }
 
@@ -44,7 +62,31 @@ const handleSell = () => {
 }
 
 const sellItem = async () => {
+  setBlur({filter: "blur(10px)"})
+  setLoadingHidden(false)
   console.log('Item sold for ' + price)
+  const listing = await opend.listItem(id, Number(price))
+  console.log('listing result:' + listing)
+
+  if (listing === "Success") {
+    let canisterID = await opend.getOpenDCanisterID()
+    const transferResult = await NFTActor.transferOwnership(canisterID)
+
+    console.log("transfer result: "  + transferResult)
+    if (transferResult == "Success") {
+      setLoadingHidden(true)
+      setButton()
+      setPriceInput()
+      setOwner("OpenD Marketplace")
+      setSellStatus("Listed!")
+    }
+    else {
+      setLoadingHidden(true)
+    }
+
+  }
+
+ 
 }
 
   async function getAsset() {
@@ -93,10 +135,20 @@ getAsset()
         <img
           className="disCardMedia-root makeStyles-image-19 disCardMedia-media disCardMedia-img"
           src={image}
+          style={blur}
         />
+         <div hidden={loading} className="lds-ellipsis">
+
+                <div></div>
+                <div></div>
+                <div></div>
+                <div></div>
+
+          </div>
+
         <div className="disCardContent-root">
           <h2 className="disTypography-root makeStyles-bodyText-24 disTypography-h5 disTypography-gutterBottom">
-            {name}<span className="purple-text"></span>
+            {name}<span className="purple-text"> {sellStatus}</span>
           </h2>
           <p className="disTypography-root makeStyles-bodyText-24 disTypography-body2 disTypography-colorTextSecondary">
             Owner: {owner}

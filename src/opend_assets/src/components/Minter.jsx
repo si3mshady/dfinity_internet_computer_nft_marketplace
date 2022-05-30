@@ -8,9 +8,11 @@ function Minter() {
 
   const {register, handleSubmit} = useForm()
   const [nftPrincipal, setNftPrincipal] = React.useState("")
+  const [loading, setLoadingHidden] = React.useState(true)
 
   const onSubmit = async (data) => {
 
+    setLoadingHidden(false)
     const name = data.name
     const image = data.image[0]
     const imageArray = await image.arrayBuffer();
@@ -18,10 +20,11 @@ function Minter() {
     const imageByteData = [...new Uint8Array(imageArray)] // this will match the [Nat8] data type
 
     const newNFTID = await opend.mint(imageByteData, name)
+    setLoadingHidden(true)
 
     console.log(newNFTID.toText());
     setNftPrincipal(newNFTID)
-
+   
 
   }
 
@@ -29,6 +32,19 @@ function Minter() {
   return (
    
     <div className="minter-container">
+
+
+     <div hidden={loading} className="lds-ellipsis">
+
+      <div></div>
+      <div></div>
+      <div></div>
+      <div></div>
+      
+
+     </div>
+
+
       <h3 className="makeStyles-title-99 Typography-h3 form-Typography-gutterBottom">
         Create NFT
       </h3>
