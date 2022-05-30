@@ -2,11 +2,14 @@ import React from "react";
 import logo from "../../assets/logo.png";
 import {Actor,HttpAgent} from '@dfinity/agent'
 import {idlFactory} from "../../../declarations/nft"
+import {idlFactory as tokenIdlFactory} from "../../../declarations/token"
 import {Principal} from "@dfinity/principal"
 import Button from "./Button";
 import {opend} from "../../../declarations/opend";
 import CURRENT_USER_ID from "../index";
 import PriceLabel from "./PriceLabel";
+
+
 
 function Item({id, role}) {
   const [name,setName] = React.useState();
@@ -18,6 +21,7 @@ function Item({id, role}) {
   const [blur, setBlur] = React.useState()
   const [sellStatus,setSellStatus] = React.useState('')
   const [priceLabel, setPriceLabel] = React.useState('')
+  const [shouldDisplay, setShouldDisplay]  = React.useState(true)
 
   const localHost = "http://127.0.0.1:8000"
   const agent = new HttpAgent({host:localHost});
@@ -81,6 +85,29 @@ const handleSell = () => {
 
 const handleBuy = async () => {
   console.log('Buying!!')
+  setLoadingHidden(false)
+  const tokenActor = await Actor.createActor(tokenIdlFactory, {
+    agent,
+    canisterId: Principal.fromText("w6ozc-gaaaa-aaaaa-aaarq-cai"),
+  })
+
+  const originalOwner = await opend.getOriginalOwner(id);
+  const itemPrice = await opend.getListedNftPrice(id);
+
+  const result = await tokenActor.transfer(originalOwner,itemPrice);
+  console.log(result)
+  if (result == 'Success') {
+    const result = await opend.completePurchase(id,originalOwner,CURRENT_USER_ID);
+    console.log("purchase " + result);
+
+    setLoadingHidden(true)
+    setShouldDisplay(false)
+  }
+
+  setLoadingHidden(true)
+
+
+  
 }
 
 const sellItem = async () => {
@@ -152,7 +179,7 @@ getAsset()
 
 
   return (
-    <div className="disGrid-item">
+    <div style={{display: shouldDisplay ? "inline": "none"}} className="disGrid-item">
       <div className="disPaper-root disCard-root makeStyles-root-17 disPaper-elevation1 disPaper-rounded">
         <img
           className="disCardMedia-root makeStyles-image-19 disCardMedia-media disCardMedia-img"

@@ -110,7 +110,7 @@ actor OpenD {
   public query func getOriginalOwner (id: Principal): async Principal {
       var listing: Listing = switch (mapOfListings.get(id)) {
         case null return Principal.fromText("");
-        case(?result) result;
+        case(?_result) _result;
 
       };
 
@@ -123,5 +123,36 @@ actor OpenD {
     } else {
       return true;
     }
+
   };
+
+  public shared(msg) func completePurchase(id: Principal, ownerId: Principal, newOwnerId: Principal): async Text {
+    var purchasedNFT: NFTActorClass.NFT = switch (mapOfNFTs.get(id)) {
+      case null return "NFT does not exist";
+      case (?result) result;
+    };
+
+    let transferResult = await purchasedNFT.transferOwnership(newOwnerId);
+    if (transferResult == "Success") {
+      mapOfListings.delete(id);
+      var ownedNFTsList : List.List<Principal> = switch (mapOfOwners.get(ownerId)) {
+        case null List.nil<Principal>();
+        case (?result) result;
+      };
+
+      ownedNFTsList  := List.filter(ownedNFTsList, func (listItemId: Principal) : Bool {
+        return listItemId != id;
+      });
+
+      addToOwnershipMap(newOwnerId,id);
+   return "Success";
+
+    } else {
+          return "Error";
+    }
+
+ 
+  };
+
+
 };
