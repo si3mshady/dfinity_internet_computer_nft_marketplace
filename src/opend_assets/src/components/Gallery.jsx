@@ -3,7 +3,7 @@ import Item from "./Item";
 import {Principal} from "@dfinity/principal";
 
 
-function Gallery({ids, title}) {
+function Gallery({ids, title, role}) {
 
 
   const [items,setItems] = React.useState()
@@ -13,7 +13,7 @@ function Gallery({ids, title}) {
 
     if (ids !== undefined) {
 
-      setItems(ids.map((NFTID) => (<Item key={NFTID.toText()}  id={NFTID}/>)))
+      setItems(ids.map((NFTID) => (<Item key={NFTID.toText()} role={role}  id={NFTID}/>)))
     }
 
    

@@ -4,6 +4,8 @@ import NFTActorClass "../NFT/nft";
 import Principal "mo:base/Principal";
 import HashMap "mo:base/HashMap";
 import List "mo:base/List";
+import Iter "mo:base/Iter";
+
 
 actor OpenD {
 
@@ -28,8 +30,6 @@ actor OpenD {
       mapOfNFTs.put(newNFTPrincipal, newNFT);
       addToOwnershipMap(owner, newNFTPrincipal); 
 
-
-
       return newNFTPrincipal
 
     };
@@ -39,7 +39,6 @@ actor OpenD {
       // Motoko option -> must use switch statement 
       // what happens when null is returned, what happens when there is a value 
         var ownedNFTList : List.List<Principal> = switch (mapOfOwners.get(owner)) {
-
           case null List.nil<Principal>();
           case (?result) result;
 
@@ -52,7 +51,6 @@ actor OpenD {
 
 
     public query func getOwnedNfts(user: Principal) : async [Principal] {
-
       var userNftListing : List.List<Principal> = switch (mapOfOwners.get(user)) {
         case null List.nil<Principal>();
         case (?result) result;
@@ -61,6 +59,22 @@ actor OpenD {
 
       return List.toArray(userNftListing);
 
+    };
+
+    public query func getListedNfts() : async [Principal] {
+          let ids =  Iter.toArray(mapOfListings.keys());
+          return ids;
+
+    };
+
+    public query func getListedNftPrice(id: Principal) : async Nat {
+      var listing: Listing = switch (mapOfListings.get(id)) {
+        case null return 0;
+        case(?result) result;
+
+      };
+
+      return listing.itemPrice;
     };
 
     public shared(msg) func listItem(id: Principal, price: Nat) : async Text {
@@ -92,6 +106,16 @@ actor OpenD {
     return Principal.fromActor(OpenD);
   };
 
+
+  public query func getOriginalOwner (id: Principal): async Principal {
+      var listing: Listing = switch (mapOfListings.get(id)) {
+        case null return Principal.fromText("");
+        case(?result) result;
+
+      };
+
+      return listing.itemOwner;
+  };
 
   public query func isListed(id: Principal): async Bool {
     if (mapOfListings.get(id) == null) {

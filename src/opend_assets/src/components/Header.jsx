@@ -6,18 +6,27 @@ import Minter from "./Minter";
 import Gallery from "./Gallery";
 import { opend } from "../../../declarations/opend"
 import CURRENT_USER_ID from "../index";
+import Item from "./Item";
+import PriceLabel from "./PriceLabel";
 
 
 function Header() {
 
 // const [nftId, setNftId] = React.useState()
 const [userOwnedGallery, setUserOwnedGallery] = React.useState()
+const [listingGallery, setListingGallery] = React.useState()
 
   const getNfts = async () => {
       const userNftIds  = await opend.getOwnedNfts(CURRENT_USER_ID)
       console.log('test')
       console.log(userNftIds)
-      setUserOwnedGallery( <Gallery ids={userNftIds} title={"Elliott's Collection"}/>)
+      setUserOwnedGallery( <Gallery role="collection" ids={userNftIds} title={"Elliott's Collection"}/>)
+
+      const listedNfts = await opend.getListedNfts()
+      console.log("listed NFTs", listedNfts)
+      setListingGallery( <Gallery role="discover"  ids={listedNfts} title={"Discover"}/>)
+
+
   }
 
   React.useEffect(() => {
@@ -65,7 +74,7 @@ const [userOwnedGallery, setUserOwnedGallery] = React.useState()
       </Route>
 
       <Route path='/discover'>
-        <h1>Discover</h1>
+       {listingGallery}
       </Route>
       <Route path="/minter">
         <Minter/>

@@ -5,8 +5,10 @@ import {idlFactory} from "../../../declarations/nft"
 import {Principal} from "@dfinity/principal"
 import Button from "./Button";
 import {opend} from "../../../declarations/opend";
+import CURRENT_USER_ID from "../index";
+import PriceLabel from "./PriceLabel";
 
-function Item({id}) {
+function Item({id, role}) {
   const [name,setName] = React.useState();
   const [owner,setOwner] = React.useState();
   const [image,setImage] = React.useState();
@@ -15,6 +17,7 @@ function Item({id}) {
   const [loading, setLoadingHidden] = React.useState(true)
   const [blur, setBlur] = React.useState()
   const [sellStatus,setSellStatus] = React.useState('')
+  const [priceLabel, setPriceLabel] = React.useState('')
 
   const localHost = "http://127.0.0.1:8000"
   const agent = new HttpAgent({host:localHost});
@@ -33,17 +36,32 @@ function Item({id}) {
   
     setOwner(owner.toText())
 
-    const isListed = await opend.isListed(id)
+    if (role == 'collection') {
+      const isListed = await opend.isListed(id)
   
-    if (isListed) {
-      setBlur({filter: "blur(10px)"})
-      setOwner("OpenD Marketplace")
-      setSellStatus("Listed!")
-    }
-    else {
-      setButton(<Button text={"Sell"} handleClick={handleSell}/>)
-    }
-   
+      if (isListed) {
+        setBlur({filter: "blur(4px)"})
+        setOwner("OpenD Marketplace")
+        setSellStatus("Listed!")
+      }
+      else {
+        setButton(<Button text={"Sell"} handleClick={handleSell}/>)
+      }
+     } else if (role == 'discover') {
+       const originalOwner = await opend.getOriginalOwner(id)
+       if (originalOwner.toText() != CURRENT_USER_ID.toText()) {
+        setButton(<Button text={"Buy"} handleClick={handleBuy}/>)
+
+
+
+       }
+
+
+       const price = await opend.getListedNftPrice(id)
+       setPriceLabel(<PriceLabel sellPrice={price.toString()}/>)
+     
+     }
+    
 
   }
 
@@ -59,6 +77,10 @@ const handleSell = () => {
   />)
 
   setButton(<Button text={"Confirm"} handleClick={sellItem}/>)
+}
+
+const handleBuy = async () => {
+  console.log('Buying!!')
 }
 
 const sellItem = async () => {
@@ -147,6 +169,7 @@ getAsset()
           </div>
 
         <div className="disCardContent-root">
+          {priceLabel}
           <h2 className="disTypography-root makeStyles-bodyText-24 disTypography-h5 disTypography-gutterBottom">
             {name}<span className="purple-text"> {sellStatus}</span>
           </h2>
